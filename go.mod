@@ -1,4 +1,4 @@
-module github.com/echocat/sl4g-bridge-logr
+module github.com/echocat/slf4g-bridge-logr
 
 go 1.15
 

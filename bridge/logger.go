@@ -34,7 +34,7 @@ func (instance *Bridge) log(level log.Level, msg string, err error, keysAndValue
 	if err != nil {
 		f = f.With(logger.GetProvider().GetFieldKeySpec().GetError(), err)
 	}
-	logger.LogEvent(log.NewEvent(level, f, 3))
+	logger.Log(log.NewEvent(level, f, 3))
 }
 
 func (instance *Bridge) Info(msg string, keysAndValues ...interface{}) {

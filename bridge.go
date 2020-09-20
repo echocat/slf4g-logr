@@ -10,50 +10,57 @@ var Default = CreateFor(log.GetGlobalLogger())
 
 func CreateFor(logger log.Logger) *Bridge {
 	return &Bridge{
-		Logger: logger,
-		Level:  log.LevelInfo,
+		Target: logger,
+		Level:  0,
 	}
 }
 
 type Bridge struct {
-	Logger log.Logger
+	Target log.Logger
 	Level  log.Level
 }
 
 func (instance *Bridge) Enabled() bool {
-	return instance.logger().IsLevelEnabled(instance.level())
+	return instance.logger().IsLevelEnabled(instance.level() + log.LevelInfo)
+}
+
+func (instance *Bridge) log(level log.Level, msg string, err error, keysAndValues ...interface{}) {
+	logger := instance.logger()
+	f := KeysAndValuesToFields(keysAndValues...)
+	if msg != "" {
+		f = f.With(logger.GetProvider().GetFieldKeySpec().GetMessage(), msg)
+	}
+	if err != nil {
+		f = f.With(logger.GetProvider().GetFieldKeySpec().GetError(), err)
+	}
+	logger.LogEvent(log.NewEvent(level, f, 3))
 }
 
 func (instance *Bridge) Info(msg string, keysAndValues ...interface{}) {
-	instance.Logger.
-		WithFields(KeysAndValuesToFields(keysAndValues...)).
-		Info(msg)
+	instance.log(instance.level()+log.LevelInfo, msg, nil, keysAndValues...)
 }
 
 func (instance *Bridge) Error(err error, msg string, keysAndValues ...interface{}) {
-	instance.Logger.
-		WithError(err).
-		WithFields(KeysAndValuesToFields(keysAndValues...)).
-		Error(msg)
+	instance.log(log.LevelError, msg, err, keysAndValues...)
 }
 
 func (instance *Bridge) V(level int) logr.Logger {
 	return &Bridge{
-		Logger: instance.Logger,
-		Level:  log.Level(level),
+		Target: instance.logger(),
+		Level:  instance.Level + log.Level(level),
 	}
 }
 
 func (instance *Bridge) WithValues(keysAndValues ...interface{}) logr.Logger {
 	return &Bridge{
-		Logger: instance.Logger.WithFields(KeysAndValuesToFields(keysAndValues...)),
+		Target: instance.logger().WithFields(KeysAndValuesToFields(keysAndValues...)),
 		Level:  instance.Level,
 	}
 }
 
 func (instance *Bridge) WithName(name string) logr.Logger {
 	return &Bridge{
-		Logger: instance.Logger.GetProvider().GetLogger(name),
+		Target: instance.logger().GetProvider().GetLogger(name),
 		Level:  instance.Level,
 	}
 }
@@ -72,7 +79,7 @@ func (instance *Bridge) logger() log.Logger {
 	if instance == nil {
 		return log.GetGlobalLogger()
 	}
-	if v := instance.Logger; v != nil {
+	if v := instance.Target; v != nil {
 		return v
 	}
 	return log.GetGlobalLogger()

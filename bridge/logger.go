@@ -2,6 +2,7 @@ package logr
 
 import (
 	"github.com/echocat/slf4g"
+	logr2 "github.com/echocat/slf4g-logr"
 	"github.com/go-logr/logr"
 )
 
@@ -26,7 +27,7 @@ func (instance *Bridge) Enabled() bool {
 
 func (instance *Bridge) log(level log.Level, msg string, err error, keysAndValues ...interface{}) {
 	logger := instance.logger()
-	f := KeysAndValuesToFields(keysAndValues...)
+	f := logr2.KeysAndValuesToFields(keysAndValues...)
 	if msg != "" {
 		f = f.With(logger.GetProvider().GetFieldKeySpec().GetMessage(), msg)
 	}
@@ -53,7 +54,7 @@ func (instance *Bridge) V(level int) logr.Logger {
 
 func (instance *Bridge) WithValues(keysAndValues ...interface{}) logr.Logger {
 	return &Bridge{
-		Target: instance.logger().WithFields(KeysAndValuesToFields(keysAndValues...)),
+		Target: instance.logger().WithFields(logr2.KeysAndValuesToFields(keysAndValues...)),
 		Level:  instance.Level,
 	}
 }

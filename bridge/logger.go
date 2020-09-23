@@ -12,13 +12,13 @@ var Default = CreateFor(log.GetGlobalLogger())
 func CreateFor(logger log.Logger) *Bridge {
 	return &Bridge{
 		Target: logger,
-		Level:  0,
+		VL:     0,
 	}
 }
 
 type Bridge struct {
 	Target log.Logger
-	Level  log.Level
+	VL     log.Level
 }
 
 func (instance *Bridge) Enabled() bool {
@@ -48,32 +48,29 @@ func (instance *Bridge) Error(err error, msg string, keysAndValues ...interface{
 func (instance *Bridge) V(level int) logr.Logger {
 	return &Bridge{
 		Target: instance.logger(),
-		Level:  instance.Level + log.Level(level),
+		VL:     instance.VL + log.Level(level),
 	}
 }
 
 func (instance *Bridge) WithValues(keysAndValues ...interface{}) logr.Logger {
 	return &Bridge{
 		Target: instance.logger().WithFields(logr2.KeysAndValuesToFields(keysAndValues...)),
-		Level:  instance.Level,
+		VL:     instance.VL,
 	}
 }
 
 func (instance *Bridge) WithName(name string) logr.Logger {
 	return &Bridge{
 		Target: instance.logger().GetProvider().GetLogger(name),
-		Level:  instance.Level,
+		VL:     instance.VL,
 	}
 }
 
 func (instance *Bridge) level() log.Level {
 	if instance == nil {
-		return log.LevelInfo
+		return 0
 	}
-	if v := instance.Level; v != 0 {
-		return v
-	}
-	return log.LevelInfo
+	return instance.VL
 }
 
 func (instance *Bridge) logger() log.Logger {

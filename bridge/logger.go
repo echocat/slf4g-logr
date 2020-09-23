@@ -17,8 +17,9 @@ func CreateFor(logger log.Logger) *Bridge {
 }
 
 type Bridge struct {
-	Target log.Logger
-	VL     log.Level
+	Target      log.Logger
+	VL          log.Level
+	CallerDepth int
 }
 
 func (instance *Bridge) Enabled() bool {
@@ -34,7 +35,7 @@ func (instance *Bridge) log(level log.Level, msg string, err error, keysAndValue
 	if err != nil {
 		f = f.With(logger.GetProvider().GetFieldKeySpec().GetError(), err)
 	}
-	logger.Log(log.NewEvent(level, f, 3))
+	logger.Log(log.NewEvent(level, f, 2+instance.CallerDepth))
 }
 
 func (instance *Bridge) Info(msg string, keysAndValues ...interface{}) {

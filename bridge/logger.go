@@ -19,12 +19,16 @@ func CreateFor(logger log.Logger) *Bridge {
 
 type Bridge struct {
 	Target      log.Logger
-	VL          level.Level
+	VL          int
 	CallerDepth int
 }
 
-func (instance *Bridge) Enabled() bool {
-	return instance.logger().IsLevelEnabled(instance.level() + level.Info)
+func (instance *Bridge) Init(info logr.RuntimeInfo) {
+	instance.CallerDepth = info.CallDepth
+}
+
+func (instance *Bridge) Enabled(vl int) bool {
+	return instance.logger().IsLevelEnabled(instance.level(vl))
 }
 
 func (instance *Bridge) log(l level.Level, msg string, err error, keysAndValues ...interface{}) {
@@ -39,40 +43,59 @@ func (instance *Bridge) log(l level.Level, msg string, err error, keysAndValues 
 	logger.Log(logger.NewEvent(l, f), uint16(2+instance.CallerDepth))
 }
 
-func (instance *Bridge) Info(msg string, keysAndValues ...interface{}) {
-	instance.log(instance.level()+level.Info, msg, nil, keysAndValues...)
+func (instance *Bridge) Info(lvl int, msg string, keysAndValues ...interface{}) {
+	instance.log(instance.level(lvl), msg, nil, keysAndValues...)
 }
 
 func (instance *Bridge) Error(err error, msg string, keysAndValues ...interface{}) {
 	instance.log(level.Error, msg, err, keysAndValues...)
 }
 
-func (instance *Bridge) V(l int) logr.Logger {
+func (instance *Bridge) V(vl int) logr.LogSink {
 	return &Bridge{
 		Target: instance.logger(),
-		VL:     instance.VL + level.Level(l),
+		VL:     instance.vl(vl),
 	}
 }
 
-func (instance *Bridge) WithValues(keysAndValues ...interface{}) logr.Logger {
+func (instance *Bridge) WithValues(keysAndValues ...interface{}) logr.LogSink {
 	return &Bridge{
 		Target: instance.logger().WithAll(logr2.KeysAndValuesToFields(keysAndValues...)),
-		VL:     instance.VL,
+		VL:     instance.vl(0),
 	}
 }
 
-func (instance *Bridge) WithName(name string) logr.Logger {
+func (instance *Bridge) WithName(name string) logr.LogSink {
 	return &Bridge{
 		Target: instance.logger().GetProvider().GetLogger(name),
-		VL:     instance.VL,
+		VL:     instance.vl(0),
 	}
 }
 
-func (instance *Bridge) level() level.Level {
+func (instance *Bridge) vl(vl int) int {
 	if instance == nil {
+		return vl
+	}
+	return instance.VL + vl
+}
+
+func (instance *Bridge) level(vl int) level.Level {
+	vl = instance.vl(vl)
+	if vl < 0 {
+		return level.Warn
+	}
+
+	switch vl {
+	case 0, 1:
+		return level.Info
+	case 2, 3:
+		return level.Debug
+	case 4, 5:
+		return level.Trace
+	default:
 		return 0
 	}
-	return instance.VL
+
 }
 
 func (instance *Bridge) logger() log.Logger {

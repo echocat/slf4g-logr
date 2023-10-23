@@ -1,4 +1,4 @@
-github.com/echocat/slf4g v1.5.1 h1:09PnuPs1VEV7SHlbKFm0nA2l7b1WsGprCh9oucKk+CA=
-github.com/echocat/slf4g v1.5.1/go.mod h1:YvF/d1TcPvT+/xiHStLHPI4xPT1GGeEmPczn2MSljNA=
+github.com/echocat/slf4g v1.5.2 h1:QBdnMI95Ju9j0VHsZ7IHGFKqrsF1EBN1n9EqWIjM4dw=
+github.com/echocat/slf4g v1.5.2/go.mod h1:YvF/d1TcPvT+/xiHStLHPI4xPT1GGeEmPczn2MSljNA=
 github.com/go-logr/logr v1.2.4 h1:g01GSCwiDw2xSZfjJ2/T9M+S6pFdcNtFYsp+Y43HYDQ=
 github.com/go-logr/logr v1.2.4/go.mod h1:jdQByPbusPIv2/zmleS9BjJVeZ6kBagPoEUsqbVz/1A=

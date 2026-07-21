@@ -4,5 +4,5 @@ go 1.14
 
 require (
 	github.com/echocat/slf4g v1.8.4
-	github.com/go-logr/logr v1.4.3
+	github.com/go-logr/logr v1.4.4
 )
